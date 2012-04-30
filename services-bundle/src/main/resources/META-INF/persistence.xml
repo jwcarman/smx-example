@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             version="1.0">
+
+    <persistence-unit name="person" transaction-type="JTA">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <jta-data-source>osgi:services/javax.sql.DataSource/(osgi.jndi.service.name=h2Database)</jta-data-source>
+        <class>com.carmanconsulting.smx.example.domain.entity.Person</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="show_sql" value="true" />
+            <property name="hibernate.transaction.manager_lookup_class"
+                      value="com.carmanconsulting.smx.example.jta.OsgiTransactionManagerLookup" />
+        </properties>
+    </persistence-unit>
+
+</persistence>
