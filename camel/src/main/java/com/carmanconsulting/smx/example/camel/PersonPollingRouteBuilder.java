@@ -1,7 +1,6 @@
 package com.carmanconsulting.smx.example.camel;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.stereotype.Service;
 
 public class PersonPollingRouteBuilder extends RouteBuilder
 {

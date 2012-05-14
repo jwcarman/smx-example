@@ -33,10 +33,13 @@
                 <artifactId>openjpa-maven-plugin</artifactId>
                 <version>2.2.0</version>
                 <configuration>
-                    <includes>com/carmanconsulting/smx/example/domain/entity/**.*</includes>
+                    <includes>com/carmanconsulting/smx/example/domain/entity/**/*.class</includes>
+                    <addDefaultConstructor>true</addDefaultConstructor>
+                    <enforcePropertyRestrictions>true</enforcePropertyRestrictions>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>enhancer</id>
                         <phase>process-classes</phase>
                         <goals>
                             <goal>enhance</goal>

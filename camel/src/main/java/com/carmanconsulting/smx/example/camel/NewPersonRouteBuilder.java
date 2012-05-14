@@ -4,8 +4,6 @@ import com.carmanconsulting.smx.example.domain.entity.Person;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 public class NewPersonRouteBuilder extends RouteBuilder
 {

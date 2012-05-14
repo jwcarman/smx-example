@@ -11,6 +11,7 @@
 
     <modules>
         <module>bundle-parent</module>
+        <module>datasource</module>
         <module>service</module>
         <module>camel</module>
         <module>feature</module>
