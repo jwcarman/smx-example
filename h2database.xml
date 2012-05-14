@@ -8,7 +8,7 @@
         <property name="password" value=""/>
     </bean>
 
-    <service interface="javax.sql.DataSource" ref="dataSource">
+    <service interface="javax.sql.XADataSource" ref="dataSource">
         <service-properties>
             <entry key="osgi.jndi.service.name" value="h2Database"/>
         </service-properties>
