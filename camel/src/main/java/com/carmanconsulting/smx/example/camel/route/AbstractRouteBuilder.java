@@ -14,53 +14,57 @@
  * limitations under the License.
  */
 
-package com.carmanconsulting.smx.example.camel;
+package com.carmanconsulting.smx.example.camel.route;
 
-import com.carmanconsulting.smx.example.camel.route.AbstractRouteBuilder;
-import com.carmanconsulting.smx.example.domain.entity.Person;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 
-public class NewPersonRouteBuilder extends AbstractRouteBuilder
+public abstract class AbstractRouteBuilder extends RouteBuilder
 {
 //----------------------------------------------------------------------------------------------------------------------
 // Fields
 //----------------------------------------------------------------------------------------------------------------------
 
-    private String inputUri;
+    public static final int DEFAULT_MAX_REDELIVERIES = 3;
+    public static final int DEFAULT_REDELIVERY_DELAY = 10000;
+    public static final String DEFAULT_DLC_URI = "jms:queue:dlc";
 
 //----------------------------------------------------------------------------------------------------------------------
-// Getter/Setter Methods
+// Abstract Methods
 //----------------------------------------------------------------------------------------------------------------------
 
-    public void setInputUri(String inputUri)
-    {
-        this.inputUri = inputUri;
-    }
+    protected abstract void configureRoutes();
 
 //----------------------------------------------------------------------------------------------------------------------
 // Other Methods
 //----------------------------------------------------------------------------------------------------------------------
 
     @Override
-    protected void configureRoutes()
+    public final void configure()
     {
-        from(inputUri)
-                .transacted()
-                .process(new Processor()
-                {
+        configureErrorHandling();
+        configureRoutes();
+    }
 
-                    @Override
-                    public void process(Exchange exchange) throws Exception
-                    {
-                        final Person p = new Person();
-                        p.setFirstName("Slappy");
-                        p.setLastName("White");
-                        exchange.getIn().setBody(p);
-                    }
-                })
-                .to("bean:personRepository?method=add")
-                .end();
+    protected void configureErrorHandling()
+    {
+        onException()
+                .maximumRedeliveries(getMaxRedeliveries())
+                .redeliveryDelay(getRedeliveryDelay())
+                .to(getDeadLetterUri());
+    }
+
+    protected String getDeadLetterUri()
+    {
+        return DEFAULT_DLC_URI;
+    }
+
+    protected int getMaxRedeliveries()
+    {
+        return DEFAULT_MAX_REDELIVERIES;
+    }
+
+    protected long getRedeliveryDelay()
+    {
+        return DEFAULT_REDELIVERY_DELAY;
     }
 }
