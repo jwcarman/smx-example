@@ -32,6 +32,8 @@ public class Activity extends BaseEntity
     @Lob
     private String payload;
 
+    private String errorMessage;
+
     @Lob
     private String errorDetails;
 
@@ -54,6 +56,16 @@ public class Activity extends BaseEntity
     public void setErrorDetails(String errorDetails)
     {
         this.errorDetails = errorDetails;
+    }
+
+    public String getErrorMessage()
+    {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage)
+    {
+        this.errorMessage = errorMessage;
     }
 
     public String getExchangePattern()

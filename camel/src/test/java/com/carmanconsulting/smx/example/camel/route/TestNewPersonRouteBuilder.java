@@ -20,6 +20,7 @@ import com.carmanconsulting.smx.example.domain.entity.Person;
 import com.carmanconsulting.smx.example.domain.repository.PersonRepository;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.SimpleRegistry;
 import org.easymock.Capture;
 import org.junit.Test;
@@ -61,6 +62,27 @@ public class TestNewPersonRouteBuilder extends AbstractRouteBuilderTest
         replayAll();
 
         getInputProducerTemplate().sendBody("Do Something!");
+
+    }
+
+    @Test
+    public void testExceptionThrown() throws Exception
+    {
+        final Capture<Person> capture = new Capture<Person>();
+        expect(personRepository.add(capture(capture))).andThrow(new RuntimeException("No way jose!"));
+        expect(personRepository.add(capture(capture))).andThrow(new RuntimeException("No way jose!"));
+        final Capture<Exchange> errorExchangeCapture = new Capture<Exchange>();
+        auditService.auditExchange(anyObject(Exchange.class));
+        expectLastCall();
+        auditService.auditExchange(capture(errorExchangeCapture));
+        expectLastCall();
+        replayAll();
+        final MockEndpoint dlc = getMockEndpoint(DEAD_LETTER_URI);
+        dlc.expectedMessageCount(1);
+        getInputProducerTemplate().asyncSendBody(INPUT_URI, "Do Something!");
+        dlc.await();
+        Exchange errorExchange =errorExchangeCapture.getValue();
+
 
     }
 }

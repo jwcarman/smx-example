@@ -32,8 +32,8 @@ public abstract class AbstractRouteBuilder extends RouteBuilder
 // Fields
 //----------------------------------------------------------------------------------------------------------------------
 
-    public static final int DEFAULT_MAX_REDELIVERIES = 3;
-    public static final int DEFAULT_REDELIVERY_DELAY = 10000;
+    public static final int DEFAULT_MAX_REDELIVERIES = 2;
+    public static final int DEFAULT_REDELIVERY_DELAY = 1000;
     public static final String DEFAULT_DEAD_LETTER_URI = "jms:queue:dlc";
 
     private String inputUri;
@@ -124,6 +124,9 @@ public abstract class AbstractRouteBuilder extends RouteBuilder
         onException()
                 .maximumRedeliveries(getMaxRedeliveries())
                 .redeliveryDelay(getRedeliveryDelay())
+                .handled(true)
+                .process(new ManageActivityIdsProcessor())
+                .beanRef("auditService", "auditExchange")
                 .to(getDeadLetterUri());
     }
 

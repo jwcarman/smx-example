@@ -29,4 +29,18 @@ public class JpaPersonRepository extends AbstractJpaRepository<Person,String> im
     {
         super(Person.class);
     }
+
+//----------------------------------------------------------------------------------------------------------------------
+// Repository Implementation
+//----------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public Person add(Person entity)
+    {
+        if(size() > 5)
+        {
+            throw new RuntimeException("Person repository is getting too large!");
+        }
+        return super.add(entity);
+    }
 }

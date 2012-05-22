@@ -92,7 +92,7 @@ public abstract class AbstractJpaRepository<EntityType extends Entity<IdType>, I
 
     public int size()
     {
-        List results = entityManager.createQuery("select count(*) from " + entityClass.getName()).getResultList();
+        List results = entityManager.createQuery("select count(x) from " + entityClass.getName() + " x").getResultList();
         return ((Number)results.get(0)).intValue();
     }
 

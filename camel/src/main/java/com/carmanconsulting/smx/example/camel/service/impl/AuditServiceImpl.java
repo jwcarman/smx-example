@@ -21,6 +21,9 @@ import com.carmanconsulting.smx.example.domain.entity.Activity;
 import com.carmanconsulting.smx.example.domain.entity.BusinessProcess;
 import com.carmanconsulting.smx.example.domain.repository.BusinessProcessRepository;
 import org.apache.camel.Exchange;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -30,12 +33,12 @@ public class AuditServiceImpl implements AuditService
 // Fields
 //----------------------------------------------------------------------------------------------------------------------
 
+    private static final Logger log = LoggerFactory.getLogger(AuditServiceImpl.class);
     private BusinessProcessRepository businessProcessRepository;
 
 //----------------------------------------------------------------------------------------------------------------------
 // AuditService Implementation
 //----------------------------------------------------------------------------------------------------------------------
-
 
     @Override
     public void auditExchange(Exchange exchange)
@@ -43,7 +46,7 @@ public class AuditServiceImpl implements AuditService
         final Date now = new Date();
         String bpId = exchange.getIn().getHeader(BAM_PROCESS_ID_HEADER, String.class);
         BusinessProcess businessProcess = businessProcessRepository.getById(bpId);
-        if(businessProcess == null)
+        if (businessProcess == null)
         {
             final String name = exchange.getIn().getHeader(BAM_PROCESS_TYPE_HEADER, String.class);
 
@@ -63,9 +66,19 @@ public class AuditServiceImpl implements AuditService
         activity.setRouteId(exchange.getFromRouteId());
         activity.setExchangePattern(exchange.getPattern().name());
         final String parentActivityId = exchange.getIn().getHeader(BAM_PARENT_ACTIVITY_ID_HEADER, String.class);
-        if(parentActivityId != null)
+        if (parentActivityId != null)
         {
             activity.setParentActivity(businessProcess.findActivityById(parentActivityId));
+        }
+        log.info("Looking for exception on exchange...");
+        Throwable t = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+        log.info("Exception is {}.", t);
+        if (t != null)
+        {
+            final String fullStackTrace = ExceptionUtils.getFullStackTrace(t);
+            log.warn("Received exception\n{}", fullStackTrace);
+            activity.setErrorDetails(fullStackTrace);
+            activity.setErrorMessage(t.toString());
         }
         businessProcess.addActivity(activity);
         businessProcessRepository.update(businessProcess);
