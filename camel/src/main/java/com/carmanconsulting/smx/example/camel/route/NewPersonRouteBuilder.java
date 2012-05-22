@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.carmanconsulting.smx.example.camel;
+package com.carmanconsulting.smx.example.camel.route;
 
 import com.carmanconsulting.smx.example.camel.route.AbstractRouteBuilder;
 import com.carmanconsulting.smx.example.domain.entity.Person;
@@ -25,28 +25,13 @@ import org.apache.camel.builder.RouteBuilder;
 public class NewPersonRouteBuilder extends AbstractRouteBuilder
 {
 //----------------------------------------------------------------------------------------------------------------------
-// Fields
-//----------------------------------------------------------------------------------------------------------------------
-
-    private String inputUri;
-
-//----------------------------------------------------------------------------------------------------------------------
-// Getter/Setter Methods
-//----------------------------------------------------------------------------------------------------------------------
-
-    public void setInputUri(String inputUri)
-    {
-        this.inputUri = inputUri;
-    }
-
-//----------------------------------------------------------------------------------------------------------------------
 // Other Methods
 //----------------------------------------------------------------------------------------------------------------------
 
     @Override
     protected void configureRoutes()
     {
-        from(inputUri)
+        fromDefault()
                 .transacted()
                 .process(new Processor()
                 {

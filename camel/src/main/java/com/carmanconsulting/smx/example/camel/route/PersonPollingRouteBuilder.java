@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.carmanconsulting.smx.example.camel;
+package com.carmanconsulting.smx.example.camel.route;
 
 import com.carmanconsulting.smx.example.camel.route.AbstractRouteBuilder;
 import org.apache.camel.builder.RouteBuilder;

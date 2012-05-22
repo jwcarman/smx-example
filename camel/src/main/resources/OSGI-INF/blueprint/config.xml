@@ -26,11 +26,11 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="newPersonRouteBuilder" class="com.carmanconsulting.smx.example.camel.NewPersonRouteBuilder">
+    <bean id="newPersonRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.NewPersonRouteBuilder">
         <property name="inputUri" value="${newPerson.inputUri}" />
     </bean>
 
-    <bean id="personPollingRouteBuilder" class="com.carmanconsulting.smx.example.camel.PersonPollingRouteBuilder">
+    <bean id="personPollingRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.PersonPollingRouteBuilder">
     </bean>
 
     <reference id="connectionFactory" interface="javax.jms.ConnectionFactory" />
