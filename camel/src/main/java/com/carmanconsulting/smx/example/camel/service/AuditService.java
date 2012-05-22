@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.carmanconsulting.smx.example.camel.route;
+package com.carmanconsulting.smx.example.camel.service;
 
-public class AuditingRouteBuilder extends AbstractRouteBuilder
+import org.apache.camel.Exchange;
+
+public interface AuditService
 {
+//----------------------------------------------------------------------------------------------------------------------
+// Fields
+//----------------------------------------------------------------------------------------------------------------------
+
+    public static final String BAM_PROCESS_TYPE_HEADER = "bam_process_type";
+    public static final String BAM_PROCESS_ID_HEADER = "bam_process_id";
+    public static final String BAM_ACTIVITY_ID_HEADER = "bam_activity_id";
+    public static final String BAM_PARENT_ACTIVITY_ID_HEADER = "bam_parent_activity_id";
+
 //----------------------------------------------------------------------------------------------------------------------
 // Other Methods
 //----------------------------------------------------------------------------------------------------------------------
 
-    @Override
-    protected void configureErrorHandling()
-    {
-        // Do nothing.  Overriding default error handling!
-    }
-
-    @Override
-    protected void configureRoutes()
-    {
-        from(DEFAULT_AUDIT_URI).to("log:audit");
-    }
+    void auditExchange(Exchange exchange);
 }

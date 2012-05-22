@@ -19,9 +19,12 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              version="1.0">
 
-    <persistence-unit name="person" transaction-type="JTA">
+    <persistence-unit name="domain" transaction-type="JTA">
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=h2Database)</jta-data-source>
+        <class>com.carmanconsulting.smx.example.domain.entity.BaseEntity</class>
+        <class>com.carmanconsulting.smx.example.domain.entity.Activity</class>
+        <class>com.carmanconsulting.smx.example.domain.entity.BusinessProcess</class>
         <class>com.carmanconsulting.smx.example.domain.entity.Person</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>

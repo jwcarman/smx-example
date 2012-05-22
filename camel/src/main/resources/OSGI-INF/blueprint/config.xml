@@ -18,6 +18,7 @@
 
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
+           xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.0.0"
            xmlns:camel="http://camel.apache.org/schema/blueprint">
 
     <cm:property-placeholder id="myblueprint.placeholder" persistent-id="com.carmanconsulting.smx.example">
@@ -26,12 +27,13 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="newPersonRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.NewPersonRouteBuilder">
-        <property name="inputUri" value="${newPerson.inputUri}" />
+    <bean id="auditService" class="com.carmanconsulting.smx.example.camel.service.impl.AuditServiceImpl">
+        <property name="businessProcessRepository" ref="businessProcessRepository" />
+        <tx:transaction method="*" value="RequiresNew" />
     </bean>
 
-    <bean id="auditingRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.AuditingRouteBuilder">
-
+    <bean id="newPersonRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.NewPersonRouteBuilder">
+        <property name="inputUri" value="${newPerson.inputUri}" />
     </bean>
 
     <bean id="personPollingRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.PersonPollingRouteBuilder">
@@ -43,6 +45,8 @@
 
     <reference id="personRepository" interface="com.carmanconsulting.smx.example.domain.repository.PersonRepository" />
 
+    <reference id="businessProcessRepository" interface="com.carmanconsulting.smx.example.domain.repository.BusinessProcessRepository" />
+
     <bean id="jms" class="org.apache.camel.component.jms.JmsComponent">
         <property name="connectionFactory" ref="connectionFactory" />
     </bean>
@@ -50,7 +54,6 @@
     <camel:camelContext>
         <camel:routeBuilder ref="newPersonRouteBuilder" />
         <camel:routeBuilder ref="personPollingRouteBuilder" />
-        <camel:routeBuilder ref="auditingRouteBuilder" />
     </camel:camelContext>
 </blueprint>
 

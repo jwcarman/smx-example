@@ -18,8 +18,8 @@ package com.carmanconsulting.smx.example.camel.route;
 
 import com.carmanconsulting.smx.example.domain.entity.Person;
 import com.carmanconsulting.smx.example.domain.repository.PersonRepository;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.SimpleRegistry;
 import org.easymock.Capture;
 import org.junit.Test;
@@ -55,11 +55,12 @@ public class TestNewPersonRouteBuilder extends AbstractRouteBuilderTest
     {
         final Capture<Person> capture = new Capture<Person>();
         expect(personRepository.add(capture(capture))).andAnswer(valueOf(capture));
+
+        auditService.auditExchange(anyObject(Exchange.class));
+        expectLastCall();
         replayAll();
 
-        final MockEndpoint auditEndpoint = getMockEndpoint(AUDIT_URI);
-        auditEndpoint.expectedMessageCount(1);
         getInputProducerTemplate().sendBody("Do Something!");
-        auditEndpoint.await();
+
     }
 }

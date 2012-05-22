@@ -14,46 +14,20 @@
  * limitations under the License.
  */
 
-package com.carmanconsulting.smx.example.domain.entity;
+package com.carmanconsulting.smx.example.domain.repository.impl;
 
-import javax.persistence.Entity;
+import com.carmanconsulting.smx.example.domain.entity.BusinessProcess;
+import com.carmanconsulting.smx.example.domain.repository.BusinessProcessRepository;
 
-@Entity
-public class Person extends BaseEntity
+public class JpaBusinessProcessRepository extends AbstractJpaRepository<BusinessProcess, String> implements BusinessProcessRepository
 {
 //----------------------------------------------------------------------------------------------------------------------
-// Fields
+// Constructors
 //----------------------------------------------------------------------------------------------------------------------
 
-    private String firstName;
-    private String lastName;
-
-//----------------------------------------------------------------------------------------------------------------------
-// Getter/Setter Methods
-//----------------------------------------------------------------------------------------------------------------------
-
-    public String getFirstName()
+    public JpaBusinessProcessRepository()
     {
-        return firstName;
+        super(BusinessProcess.class);
     }
 
-    public void setFirstName(String firstName)
-    {
-        this.firstName = firstName;
-    }
-
-    public String getLastName()
-    {
-        return lastName;
-    }
-
-    public void setLastName(String lastName)
-    {
-        this.lastName = lastName;
-    }
-
-    protected void setId(String id)
-    {
-        this.id = id;
-    }
 }

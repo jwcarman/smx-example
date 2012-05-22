@@ -21,11 +21,15 @@
            xmlns:jpa="http://aries.apache.org/xmlns/jpa/v1.1.0">
 
     <bean id="personRepository" class="com.carmanconsulting.smx.example.domain.repository.impl.JpaPersonRepository">
-        <jpa:context property="entityManager" unitname="person" />
+        <jpa:context property="entityManager" unitname="domain" />
         <tx:transaction method="*" value="Required" />
     </bean>
 
+    <bean id="businessProcessRepository" class="com.carmanconsulting.smx.example.domain.repository.impl.JpaBusinessProcessRepository">
+        <jpa:context property="entityManager" unitname="domain" />
+        <tx:transaction method="*" value="Required" />
+    </bean>
     <service ref="personRepository" interface="com.carmanconsulting.smx.example.domain.repository.PersonRepository" />
-
+    <service ref="businessProcessRepository" interface="com.carmanconsulting.smx.example.domain.repository.BusinessProcessRepository" />
 </blueprint>
 
