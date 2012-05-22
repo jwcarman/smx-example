@@ -16,11 +16,23 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
+import com.carmanconsulting.smx.example.domain.entity.Person;
+import com.carmanconsulting.smx.example.domain.repository.PersonRepository;
 import org.apache.camel.builder.RouteBuilder;
-import org.testng.annotations.Test;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.SimpleRegistry;
+import org.easymock.Capture;
+import org.junit.Test;
+import static org.easymock.EasyMock.*;
 
 public class TestNewPersonRouteBuilder extends AbstractRouteBuilderTest
 {
+//----------------------------------------------------------------------------------------------------------------------
+// Fields
+//----------------------------------------------------------------------------------------------------------------------
+
+    private PersonRepository personRepository;
+
 //----------------------------------------------------------------------------------------------------------------------
 // Other Methods
 //----------------------------------------------------------------------------------------------------------------------
@@ -31,9 +43,23 @@ public class TestNewPersonRouteBuilder extends AbstractRouteBuilderTest
         return configure(new NewPersonRouteBuilder());
     }
 
-    //@Test
-    public void testHappyPath()
+    @Override
+    protected void doBindings(SimpleRegistry registry)
     {
+        personRepository = createMock(PersonRepository.class);
+        registry.put("personRepository", personRepository);
+    }
+
+    @Test
+    public void testHappyPath() throws Exception
+    {
+        final Capture<Person> capture = new Capture<Person>();
+        expect(personRepository.add(capture(capture))).andAnswer(valueOf(capture));
+        replayAll();
+
+        final MockEndpoint auditEndpoint = getMockEndpoint(AUDIT_URI);
+        auditEndpoint.expectedMessageCount(1);
         getInputProducerTemplate().sendBody("Do Something!");
+        auditEndpoint.await();
     }
 }

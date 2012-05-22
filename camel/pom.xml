@@ -89,7 +89,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>
-            <artifactId>camel-testng</artifactId>
+            <artifactId>camel-test</artifactId>
             <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>

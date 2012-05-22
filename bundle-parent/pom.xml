@@ -87,9 +87,9 @@
         Use SLF4J for Logging
         -->
         <dependency>
-            <groupId>org.ops4j.pax.logging</groupId>
-            <artifactId>pax-logging-api</artifactId>
-            <version>1.6.5</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -97,9 +97,21 @@
         Unit Testing Dependencies
         -->
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.5.2</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>3.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -113,7 +125,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>${osgi.import}</Import-Package>
-                        <!--<DynamicImport-Package>${osgi.dynamic.import}</DynamicImport-Package>-->
+                        <DynamicImport-Package>${osgi.dynamic.import}</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

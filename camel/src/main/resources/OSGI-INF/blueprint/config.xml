@@ -30,6 +30,10 @@
         <property name="inputUri" value="${newPerson.inputUri}" />
     </bean>
 
+    <bean id="auditingRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.AuditingRouteBuilder">
+
+    </bean>
+
     <bean id="personPollingRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.PersonPollingRouteBuilder">
     </bean>
 
@@ -46,6 +50,7 @@
     <camel:camelContext>
         <camel:routeBuilder ref="newPersonRouteBuilder" />
         <camel:routeBuilder ref="personPollingRouteBuilder" />
+        <camel:routeBuilder ref="auditingRouteBuilder" />
     </camel:camelContext>
 </blueprint>
 

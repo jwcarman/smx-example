@@ -16,35 +16,21 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
-import com.carmanconsulting.smx.example.camel.route.AbstractRouteBuilder;
-import com.carmanconsulting.smx.example.domain.entity.Person;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.camel.builder.RouteBuilder;
-
-public class NewPersonRouteBuilder extends AbstractRouteBuilder
+public class AuditingRouteBuilder extends AbstractRouteBuilder
 {
 //----------------------------------------------------------------------------------------------------------------------
 // Other Methods
 //----------------------------------------------------------------------------------------------------------------------
 
     @Override
+    protected void configureErrorHandling()
+    {
+        // Do nothing.  Overriding default error handling!
+    }
+
+    @Override
     protected void configureRoutes()
     {
-        beginFrom(getInputUri(), "New Person")
-                .process(new Processor()
-                {
-
-                    @Override
-                    public void process(Exchange exchange) throws Exception
-                    {
-                        final Person p = new Person();
-                        p.setFirstName("Slappy");
-                        p.setLastName("White");
-                        exchange.getIn().setBody(p);
-                    }
-                })
-                .to("bean:personRepository?method=add")
-                .end();
+        from(DEFAULT_AUDIT_URI).to("log:audit");
     }
 }
