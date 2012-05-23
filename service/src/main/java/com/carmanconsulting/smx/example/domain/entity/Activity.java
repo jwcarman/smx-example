@@ -42,6 +42,7 @@ public class Activity extends BaseEntity
 
     private String exchangePattern;
     private String fromUri;
+    private String errorUri;
     private String routeId;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -66,6 +67,16 @@ public class Activity extends BaseEntity
     public void setErrorMessage(String errorMessage)
     {
         this.errorMessage = errorMessage;
+    }
+
+    public String getErrorUri()
+    {
+        return errorUri;
+    }
+
+    public void setErrorUri(String errorUri)
+    {
+        this.errorUri = errorUri;
     }
 
     public String getExchangePattern()

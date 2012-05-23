@@ -79,6 +79,7 @@ public class AuditServiceImpl implements AuditService
             log.warn("Received exception\n{}", fullStackTrace);
             activity.setErrorDetails(fullStackTrace);
             activity.setErrorMessage(t.toString());
+            activity.setErrorUri(exchange.getProperty(Exchange.FAILURE_ENDPOINT, String.class));
         }
         businessProcess.addActivity(activity);
         businessProcessRepository.update(businessProcess);
