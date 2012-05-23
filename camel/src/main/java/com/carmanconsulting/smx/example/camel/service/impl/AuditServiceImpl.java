@@ -16,15 +16,22 @@
 
 package com.carmanconsulting.smx.example.camel.service.impl;
 
+import com.carmanconsulting.smx.example.camel.exception.BamException;
 import com.carmanconsulting.smx.example.camel.service.AuditService;
 import com.carmanconsulting.smx.example.domain.entity.Activity;
 import com.carmanconsulting.smx.example.domain.entity.BusinessProcess;
 import com.carmanconsulting.smx.example.domain.repository.BusinessProcessRepository;
+import com.thoughtworks.xstream.XStream;
 import org.apache.camel.Exchange;
+import org.apache.camel.model.dataformat.XStreamDataFormat;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.JAXB;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
 import java.util.Date;
 
 public class AuditServiceImpl implements AuditService
@@ -52,8 +59,8 @@ public class AuditServiceImpl implements AuditService
 
             businessProcess = new BusinessProcess();
             businessProcess.setId(bpId);
-            businessProcess.setBegin(now);
-            businessProcess.setLastActvity(now);
+            businessProcess.setCreated(now);
+            businessProcess.setUpdated(now);
             businessProcess.setName(name);
             businessProcessRepository.add(businessProcess);
         }
@@ -61,7 +68,7 @@ public class AuditServiceImpl implements AuditService
         final String activityId = exchange.getIn().getHeader(BAM_ACTIVITY_ID_HEADER, String.class);
         activity.setId(activityId);
         activity.setTimestamp(now);
-        activity.setPayload(exchange.getIn().getBody(String.class));
+        activity.setPayload(toPayload(exchange));
         activity.setFromUri(exchange.getFromEndpoint().getEndpointUri());
         activity.setRouteId(exchange.getFromRouteId());
         activity.setExchangePattern(exchange.getPattern().name());
@@ -70,9 +77,7 @@ public class AuditServiceImpl implements AuditService
         {
             activity.setParentActivity(businessProcess.findActivityById(parentActivityId));
         }
-        log.info("Looking for exception on exchange...");
         Throwable t = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        log.info("Exception is {}.", t);
         if (t != null)
         {
             final String fullStackTrace = ExceptionUtils.getFullStackTrace(t);
@@ -85,6 +90,27 @@ public class AuditServiceImpl implements AuditService
         businessProcessRepository.update(businessProcess);
     }
 
+    private String toPayload(Exchange exchange)
+    {
+        Object o = exchange.getIn().getBody();
+        if (o == null)
+        {
+            return "";
+        }
+        if (o instanceof String)
+        {
+            return String.valueOf(o);
+        }
+        if (o.getClass().isAnnotationPresent(XmlRootElement.class))
+        {
+            final StringWriter sw = new StringWriter();
+            JAXB.marshal(o, sw);
+            return sw.toString();
+        }
+
+        XStream xstream = new XStream();
+        return xstream.toXML(o);
+    }
 //----------------------------------------------------------------------------------------------------------------------
 // Getter/Setter Methods
 //----------------------------------------------------------------------------------------------------------------------

@@ -31,10 +31,10 @@ public class BusinessProcess extends BaseEntity
     private String name;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date begin;
+    private Date created;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastActvity;
+    private Date updated;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Activity> activities = new HashSet<Activity>();
@@ -43,24 +43,24 @@ public class BusinessProcess extends BaseEntity
 // Getter/Setter Methods
 //----------------------------------------------------------------------------------------------------------------------
 
-    public Date getBegin()
+    public Date getCreated()
     {
-        return begin;
+        return created;
     }
 
-    public void setBegin(Date begin)
+    public void setCreated(Date begin)
     {
-        this.begin = begin;
+        this.created = begin;
     }
 
-    public Date getLastActvity()
+    public Date getUpdated()
     {
-        return lastActvity;
+        return updated;
     }
 
-    public void setLastActvity(Date lastActvity)
+    public void setUpdated(Date lastActvity)
     {
-        this.lastActvity = lastActvity;
+        this.updated = lastActvity;
     }
 
     public String getName()
