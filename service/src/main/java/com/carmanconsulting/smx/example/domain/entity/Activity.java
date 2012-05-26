@@ -16,6 +16,8 @@
 
 package com.carmanconsulting.smx.example.domain.entity;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -29,24 +31,54 @@ public class Activity extends BaseEntity
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
+    private String name;
     @Lob
     private String payload;
-
-    private String errorMessage;
-
-    @Lob
-    private String errorDetails;
-
-    @ManyToOne
-    private Activity parentActivity;
-
     private String exchangePattern;
     private String fromUri;
     private String routeId;
 
+
+    private String errorMessage;
+    @Lob
+    private String errorDetails;
+    private String errorUri;
+    @Transient
+    private String parentActivityId;
+
+    @Transient
+    private String businessProcessId;
+
+
+    @ManyToOne
+    private Activity parentActivity;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private BusinessProcess businessProcess;
+
 //----------------------------------------------------------------------------------------------------------------------
 // Getter/Setter Methods
 //----------------------------------------------------------------------------------------------------------------------
+
+    public BusinessProcess getBusinessProcess()
+    {
+        return businessProcess;
+    }
+
+    void setBusinessProcess(BusinessProcess businessProcess)
+    {
+        this.businessProcess = businessProcess;
+    }
+
+    public String getBusinessProcessId()
+    {
+        return businessProcessId;
+    }
+
+    public void setBusinessProcessId(String businessProcessId)
+    {
+        this.businessProcessId = businessProcessId;
+    }
 
     public String getErrorDetails()
     {
@@ -66,6 +98,16 @@ public class Activity extends BaseEntity
     public void setErrorMessage(String errorMessage)
     {
         this.errorMessage = errorMessage;
+    }
+
+    public String getErrorUri()
+    {
+        return errorUri;
+    }
+
+    public void setErrorUri(String errorUri)
+    {
+        this.errorUri = errorUri;
     }
 
     public String getExchangePattern()
@@ -88,6 +130,16 @@ public class Activity extends BaseEntity
         this.fromUri = fromUri;
     }
 
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
     public Activity getParentActivity()
     {
         return parentActivity;
@@ -96,6 +148,16 @@ public class Activity extends BaseEntity
     public void setParentActivity(Activity parentActivity)
     {
         this.parentActivity = parentActivity;
+    }
+
+    public String getParentActivityId()
+    {
+        return parentActivityId;
+    }
+
+    public void setParentActivityId(String parentActivityId)
+    {
+        this.parentActivityId = parentActivityId;
     }
 
     public String getPayload()
@@ -131,6 +193,12 @@ public class Activity extends BaseEntity
 //----------------------------------------------------------------------------------------------------------------------
 // Other Methods
 //----------------------------------------------------------------------------------------------------------------------
+
+    public void setError(Throwable t)
+    {
+        errorMessage = t.getMessage();
+        errorDetails = ExceptionUtils.getFullStackTrace(t);
+    }
 
     public void setId(String id)
     {

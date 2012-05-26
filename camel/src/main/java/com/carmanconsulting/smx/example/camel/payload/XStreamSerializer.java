@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package com.carmanconsulting.smx.example.camel.service;
+package com.carmanconsulting.smx.example.camel.payload;
 
+import com.thoughtworks.xstream.XStream;
 import org.apache.camel.Exchange;
 
-public interface AuditService
+public class XStreamSerializer implements PayloadSerializer
 {
 //----------------------------------------------------------------------------------------------------------------------
-// Fields
+// PayloadSerializer Implementation
 //----------------------------------------------------------------------------------------------------------------------
 
-    public static final String BAM_PROCESS_TYPE_HEADER = "bam_process_type";
-    public static final String BAM_PROCESS_ID_HEADER = "bam_process_id";
-    public static final String BAM_ACTIVITY_ID_HEADER = "bam_activity_id";
-    public static final String BAM_PARENT_ACTIVITY_ID_HEADER = "bam_parent_activity_id";
-
-//----------------------------------------------------------------------------------------------------------------------
-// Other Methods
-//----------------------------------------------------------------------------------------------------------------------
-
-    void auditExchange(Exchange exchange);
+    @Override
+    public String getPayload(Exchange exchange)
+    {
+        return new XStream().toXML(exchange.getIn().getBody());
+    }
 }

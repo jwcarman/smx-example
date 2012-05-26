@@ -16,6 +16,7 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
+import com.carmanconsulting.smx.example.domain.entity.Activity;
 import com.carmanconsulting.smx.example.domain.entity.Person;
 import com.carmanconsulting.smx.example.domain.repository.PersonRepository;
 import org.apache.camel.Exchange;
@@ -54,13 +55,10 @@ public class TestNewPersonRouteBuilder extends AbstractRouteBuilderTest
     @Test
     public void testHappyPath() throws Exception
     {
-        final Capture<Person> capture = new Capture<Person>();
-        expect(personRepository.add(capture(capture))).andAnswer(valueOf(capture));
+        Capture<Person> capture = new Capture<Person>();
+        expect(personRepository.add(capture(capture))).andReturn(null);
 
-        auditService.auditExchange(anyObject(Exchange.class));
-        expectLastCall();
         replayAll();
-
         getInputProducerTemplate().sendBody("Do Something!");
 
     }
@@ -68,21 +66,17 @@ public class TestNewPersonRouteBuilder extends AbstractRouteBuilderTest
     @Test
     public void testExceptionThrown() throws Exception
     {
-        final Capture<Person> capture = new Capture<Person>();
-        expect(personRepository.add(capture(capture))).andThrow(new RuntimeException("No way jose!"));
-        expect(personRepository.add(capture(capture))).andThrow(new RuntimeException("No way jose!"));
-        final Capture<Exchange> errorExchangeCapture = new Capture<Exchange>();
-        auditService.auditExchange(anyObject(Exchange.class));
-        expectLastCall();
-        auditService.auditExchange(capture(errorExchangeCapture));
-        expectLastCall();
+        expect(personRepository.add(isA(Person.class))).andStubThrow(new RuntimeException("No way, Jose!"));
         replayAll();
         final MockEndpoint dlc = getMockEndpoint(DEAD_LETTER_URI);
         dlc.expectedMessageCount(1);
+        final MockEndpoint audit = getMockEndpoint(AUDIT_URI);
+        audit.expectedMessageCount(2);
         getInputProducerTemplate().asyncSendBody(INPUT_URI, "Do Something!");
+
         dlc.await();
-        Exchange errorExchange =errorExchangeCapture.getValue();
-
-
+        audit.await();
+        Activity beginActivity = audit.getExchanges().get(0).getIn().getBody(Activity.class);
+        Activity exceptionActivity = audit.getExchanges().get(1).getIn().getBody(Activity.class);
     }
 }

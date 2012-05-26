@@ -28,15 +28,15 @@ public class BusinessProcess extends BaseEntity
 // Fields
 //----------------------------------------------------------------------------------------------------------------------
 
-    private String name;
+    private String type;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date begin;
+    private Date begin = new Date();
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastActvity;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Activity> activities = new HashSet<Activity>();
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -63,14 +63,14 @@ public class BusinessProcess extends BaseEntity
         this.lastActvity = lastActvity;
     }
 
-    public String getName()
+    public String getType()
     {
-        return name;
+        return type;
     }
 
-    public void setName(String name)
+    public void setType(String name)
     {
-        this.name = name;
+        this.type = name;
     }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -80,6 +80,8 @@ public class BusinessProcess extends BaseEntity
     public void addActivity(Activity activity)
     {
         activities.add(activity);
+        setLastActvity(activity.getTimestamp() == null ? new Date() : activity.getTimestamp());
+        activity.setBusinessProcess(this);
     }
 
     public Activity findActivityById(String id)

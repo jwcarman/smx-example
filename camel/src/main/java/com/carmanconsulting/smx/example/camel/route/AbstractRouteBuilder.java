@@ -16,31 +16,43 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
-import com.carmanconsulting.smx.example.camel.exception.BamException;
-import com.carmanconsulting.smx.example.camel.service.AuditService;
-import org.apache.camel.Exchange;
-import org.apache.camel.Expression;
-import org.apache.camel.Processor;
+import com.carmanconsulting.smx.example.camel.payload.JaxbSerializer;
+import com.carmanconsulting.smx.example.camel.payload.PayloadSerializer;
+import com.carmanconsulting.smx.example.camel.payload.StringEchoSerializer;
+import com.carmanconsulting.smx.example.camel.payload.XStreamSerializer;
+import com.carmanconsulting.smx.example.domain.entity.Activity;
+import com.carmanconsulting.smx.example.domain.entity.BusinessProcess;
+import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.RouteDefinition;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
-public abstract class AbstractRouteBuilder extends RouteBuilder
+public abstract class AbstractRouteBuilder extends RouteBuilder implements Service
 {
 //----------------------------------------------------------------------------------------------------------------------
 // Fields
 //----------------------------------------------------------------------------------------------------------------------
 
+    public static final String HEADER_ACTIVITY_ID = "activity_id";
+    public static final String HEADER_PARENT_ACTIVITY_ID = "parent_activity_id";
+    public static final String HEADER_PROCESS_ID = "process_id";
+
     public static final int DEFAULT_MAX_REDELIVERIES = 2;
     public static final int DEFAULT_REDELIVERY_DELAY = 1000;
     public static final String DEFAULT_DEAD_LETTER_URI = "jms:queue:dlc";
+    public static final String DEFAULT_AUDIT_URI = "jms:queue:audit";
 
     private String inputUri;
     private String outputUri;
+    private String auditUri = DEFAULT_AUDIT_URI;
     private String deadLetterUri = DEFAULT_DEAD_LETTER_URI;
     private int maxRedeliveries = DEFAULT_MAX_REDELIVERIES;
     private long redeliveryDelay = DEFAULT_REDELIVERY_DELAY;
+    private ProducerTemplate auditProducerTemplate;
 
 //----------------------------------------------------------------------------------------------------------------------
 // Abstract Methods
@@ -49,8 +61,34 @@ public abstract class AbstractRouteBuilder extends RouteBuilder
     protected abstract void configureRoutes();
 
 //----------------------------------------------------------------------------------------------------------------------
+// Service Implementation
+//----------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public void start() throws Exception
+    {
+        // Do nothing.
+    }
+
+    @Override
+    public void stop() throws Exception
+    {
+        auditProducerTemplate.stop();
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
 // Getter/Setter Methods
 //----------------------------------------------------------------------------------------------------------------------
+
+    public String getAuditUri()
+    {
+        return auditUri;
+    }
+
+    public void setAuditUri(String auditUri)
+    {
+        this.auditUri = auditUri;
+    }
 
     public String getDeadLetterUri()
     {
@@ -106,14 +144,20 @@ public abstract class AbstractRouteBuilder extends RouteBuilder
 // Other Methods
 //----------------------------------------------------------------------------------------------------------------------
 
-    protected RouteDefinition beginFrom(String uri, String businessProcessType)
+    protected void auditActivity(Activity activity)
     {
-        return from(uri).process(new BeginBusinessProcessProcessor(businessProcessType)).beanRef("auditService", "auditExchange");
+        auditProducerTemplate.asyncSendBody(getAuditUri(), activity);
+    }
+
+    protected BeginBusinessProcessProcessor beginProcess()
+    {
+        return new BeginBusinessProcessProcessor();
     }
 
     @Override
     public final void configure()
     {
+        this.auditProducerTemplate = getContext().createProducerTemplate();
         interceptFrom().process(new ManageActivityIdsProcessor());
         configureErrorHandling();
         configureRoutes();
@@ -126,7 +170,8 @@ public abstract class AbstractRouteBuilder extends RouteBuilder
                 .redeliveryDelay(getRedeliveryDelay())
                 .handled(true)
                 .process(new ManageActivityIdsProcessor())
-                .beanRef("auditService", "auditExchange")
+                .process(new ResumeBusinessProcessProcessor())
+                .to("log:errors?level=ERROR&showAll=true")
                 .to(getDeadLetterUri());
     }
 
@@ -140,34 +185,47 @@ public abstract class AbstractRouteBuilder extends RouteBuilder
         return from(getInputUri());
     }
 
-    protected RouteDefinition resumeFrom(String uri)
+    public List<PayloadSerializer> getPayloadSerializers()
     {
-        return from(uri).process(new ResumeBusinessProcessProcessor()).beanRef("auditService", "auditExchange");
+        return Arrays.asList(new StringEchoSerializer(), new JaxbSerializer(), new XStreamSerializer());
     }
 
-    protected RouteDefinition resumeFrom(String uri, Expression expression)
+    protected ResumeBusinessProcessProcessor resumeProcess()
     {
-        return from(uri).process(new ResumeBusinessProcessProcessor(expression)).beanRef("auditService", "auditExchange");
+        return new ResumeBusinessProcessProcessor();
     }
 
 //----------------------------------------------------------------------------------------------------------------------
 // Inner Classes
 //----------------------------------------------------------------------------------------------------------------------
 
-    private class BeginBusinessProcessProcessor implements Processor
+    protected class BeginBusinessProcessProcessor extends RecordActivityProcessor
     {
-        private final String businessProcessType;
+        private String processType;
 
-        private BeginBusinessProcessProcessor(String businessProcessType)
+        @Override
+        protected Activity buildActivity(Exchange exchange)
         {
-            this.businessProcessType = businessProcessType;
+            Activity activity = super.buildActivity(exchange);
+            final BusinessProcess businessProcess = new BusinessProcess();
+            businessProcess.setType(processType);
+            businessProcess.setBegin(activity.getTimestamp());
+            businessProcess.addActivity(activity);
+            exchange.getIn().setHeader(HEADER_PROCESS_ID, businessProcess.getId());
+            return activity;
+        }
+
+        public BeginBusinessProcessProcessor processType(String type)
+        {
+            this.processType = type;
+            return this;
         }
 
         @Override
-        public void process(Exchange exchange) throws Exception
+        public BeginBusinessProcessProcessor activityName(Expression expression)
         {
-            exchange.getIn().setHeader(AuditService.BAM_PROCESS_ID_HEADER, createUniqueId());
-            exchange.getIn().setHeader(AuditService.BAM_PROCESS_TYPE_HEADER, businessProcessType);
+            super.activityName(expression);
+            return this;
         }
     }
 
@@ -176,38 +234,108 @@ public abstract class AbstractRouteBuilder extends RouteBuilder
         @Override
         public void process(Exchange exchange) throws Exception
         {
-            String parentActivityId = exchange.getIn().getHeader(AuditService.BAM_ACTIVITY_ID_HEADER, String.class);
+            String parentActivityId = exchange.getIn().getHeader(HEADER_ACTIVITY_ID, String.class);
             if (parentActivityId != null)
             {
-                exchange.getIn().setHeader(AuditService.BAM_PARENT_ACTIVITY_ID_HEADER, parentActivityId);
+                exchange.getIn().setHeader(HEADER_PARENT_ACTIVITY_ID, parentActivityId);
             }
-            exchange.getIn().setHeader(AuditService.BAM_ACTIVITY_ID_HEADER, createUniqueId());
+            exchange.getIn().setHeader(HEADER_ACTIVITY_ID, createUniqueId());
         }
     }
 
-    private class ResumeBusinessProcessProcessor implements Processor
+    protected class RecordActivityProcessor implements Processor
     {
-        private Expression businessProcessIdExpression;
+        private Expression activityNameExpression = constant("");
 
-        private ResumeBusinessProcessProcessor()
+        @Override
+        public final void process(Exchange exchange) throws Exception
         {
-            this(header(AuditService.BAM_PROCESS_ID_HEADER));
+            Activity activity = buildActivity(exchange);
+            auditActivity(activity);
         }
 
-        private ResumeBusinessProcessProcessor(Expression businessProcessIdExpression)
+        protected Activity buildActivity(Exchange exchange)
         {
-            this.businessProcessIdExpression = businessProcessIdExpression;
+            Activity activity = new Activity();
+            final Date timestamp = exchange.getProperty(Exchange.CREATED_TIMESTAMP, Date.class);
+            activity.setTimestamp(timestamp);
+            activity.setName(activityNameExpression.evaluate(exchange, String.class));
+            activity.setFromUri(exchange.getFromEndpoint().getEndpointUri());
+            activity.setExchangePattern(exchange.getPattern().name());
+            activity.setRouteId(exchange.getFromRouteId());
+            activity.setId(exchange.getIn().getHeader(HEADER_ACTIVITY_ID, String.class));
+            activity.setParentActivityId(exchange.getIn().getHeader(HEADER_PARENT_ACTIVITY_ID, String.class));
+            activity.setPayload(serializePayload(exchange));
+            Throwable exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Throwable.class);
+            if (exception != null)
+            {
+                activity.setError(exception);
+                activity.setErrorUri(exchange.getProperty(Exchange.FAILURE_ENDPOINT, String.class));
+            }
+            return activity;
+        }
+
+        private String serializePayload(Exchange exchange)
+        {
+            final Object body = exchange.getIn().getBody();
+            if (body == null)
+            {
+                return null;
+            }
+            for (PayloadSerializer serializer : getPayloadSerializers())
+            {
+                try
+                {
+                    String payload = serializer.getPayload(exchange);
+                    if (payload != null)
+                    {
+                        return payload;
+                    }
+                }
+                catch (RuntimeException e)
+                {
+                    // Do nothing...
+                }
+            }
+            return String.valueOf(body);
+        }
+
+        public RecordActivityProcessor activityName(Expression expression)
+        {
+            this.activityNameExpression = expression;
+            return this;
+        }
+    }
+
+    protected class ResumeBusinessProcessProcessor extends RecordActivityProcessor
+    {
+        private Expression processIdExpression = header(HEADER_PROCESS_ID);
+
+        public ResumeBusinessProcessProcessor processId(Expression expression)
+        {
+            this.processIdExpression = expression;
+            return this;
         }
 
         @Override
-        public void process(Exchange exchange) throws Exception
+        protected Activity buildActivity(Exchange exchange)
         {
-            String businessProcessId = businessProcessIdExpression.evaluate(exchange, String.class);
-            if (businessProcessId == null)
+            Activity activity = super.buildActivity(exchange);
+            final String businessProcessId = processIdExpression.evaluate(exchange, String.class);
+            if(businessProcessId == null)
             {
-                throw new BamException("Unable to resume business process.  Business process id not found using expression " + businessProcessIdExpression + ".");
+                throw new CamelExecutionException("Unable to continue business process.  No business process id found at " + processIdExpression + ".", exchange);
             }
-            exchange.getIn().setHeader(AuditService.BAM_PROCESS_ID_HEADER, businessProcessId);
+            activity.setBusinessProcessId(businessProcessId);
+            exchange.getIn().setHeader(HEADER_PROCESS_ID, businessProcessId);
+            return activity;
+        }
+
+        @Override
+        public ResumeBusinessProcessProcessor activityName(Expression expression)
+        {
+            super.activityName(expression);
+            return this;
         }
     }
 }

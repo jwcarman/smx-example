@@ -31,7 +31,8 @@ public class NewPersonRouteBuilder extends AbstractRouteBuilder
     @Override
     protected void configureRoutes()
     {
-        beginFrom(getInputUri(), "New Person")
+        fromDefault()
+                .process(beginProcess().processType("New Person"))
                 .process(new Processor()
                 {
 

@@ -16,7 +16,6 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
-import com.carmanconsulting.smx.example.camel.service.AuditService;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -39,9 +38,10 @@ public class AbstractRouteBuilderTest extends CamelTestSupport
     public static final String INPUT_URI = "direct:input";
     public static final String OUTPUT_URI = "mock:output";
     public static final String DEAD_LETTER_URI = "mock:dlc";
+    public static final String AUDIT_URI = "mock:audit";
+
     public static final int MAX_REDELIVERIES = 1;
     public static final int REDELIVERY_DELAY = 100;
-    protected AuditService auditService;
     private final EasyMockSupport easyMockSupport = new EasyMockSupport();
 
     @Produce(uri = INPUT_URI)
@@ -63,6 +63,7 @@ public class AbstractRouteBuilderTest extends CamelTestSupport
     protected <R extends AbstractRouteBuilder> R configure(R routeBuilder)
     {
         routeBuilder.setInputUri(INPUT_URI);
+        routeBuilder.setAuditUri(AUDIT_URI);
         routeBuilder.setOutputUri(OUTPUT_URI);
         routeBuilder.setDeadLetterUri(DEAD_LETTER_URI);
         routeBuilder.setMaxRedeliveries(MAX_REDELIVERIES);
@@ -75,8 +76,6 @@ public class AbstractRouteBuilderTest extends CamelTestSupport
     {
         final SimpleRegistry registry = new SimpleRegistry();
         doBindings(registry);
-        auditService = createMock(AuditService.class);
-        registry.put("auditService", auditService);
         CamelContext context = new DefaultCamelContext(registry);
         context.setLazyLoadTypeConverters(isLazyLoadingTypeConverter());
         return context;
