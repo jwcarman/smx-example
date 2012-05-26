@@ -169,9 +169,14 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
                 .maximumRedeliveries(getMaxRedeliveries())
                 .redeliveryDelay(getRedeliveryDelay())
                 .handled(true)
-                .process(new ManageActivityIdsProcessor())
-                .process(new ResumeBusinessProcessProcessor())
-                .to("log:errors?level=ERROR&showAll=true")
+                .to("log:errors?level=ERROR&showAll=true&multiline=true")
+                .choice()
+                    .when(header(HEADER_PROCESS_ID).isNotNull())
+                        .process(new ManageActivityIdsProcessor())
+                        .process(new ResumeBusinessProcessProcessor())
+                    .otherwise()
+                        .log("Unable to audit error message.  No business process id found.")
+                .end()
                 .to(getDeadLetterUri());
     }
 
@@ -322,7 +327,7 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
         {
             Activity activity = super.buildActivity(exchange);
             final String businessProcessId = processIdExpression.evaluate(exchange, String.class);
-            if(businessProcessId == null)
+            if (businessProcessId == null)
             {
                 throw new CamelExecutionException("Unable to continue business process.  No business process id found at " + processIdExpression + ".", exchange);
             }
