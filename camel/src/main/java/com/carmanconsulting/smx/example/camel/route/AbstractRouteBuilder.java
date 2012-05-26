@@ -177,6 +177,7 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
                     .otherwise()
                         .log("Unable to audit error message.  No business process id found.")
                 .end()
+                .process(new SwapInMessageProcessor())
                 .to(getDeadLetterUri());
     }
 
@@ -341,6 +342,15 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
         {
             super.activityName(expression);
             return this;
+        }
+    }
+
+    protected class SwapInMessageProcessor implements Processor
+    {
+        @Override
+        public void process(Exchange exchange) throws Exception
+        {
+            exchange.setIn(exchange.getUnitOfWork().getOriginalInMessage());
         }
     }
 }
