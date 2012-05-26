@@ -26,4 +26,9 @@ public class BamException extends RuntimeException
     {
         super(message);
     }
+
+    public BamException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
 }

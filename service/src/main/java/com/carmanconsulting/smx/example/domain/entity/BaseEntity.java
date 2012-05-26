@@ -34,37 +34,10 @@ public class BaseEntity implements org.domdrides.entity.Entity<String>
 // Entity Implementation
 //----------------------------------------------------------------------------------------------------------------------
 
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o)
-        {
-            return true;
-        }
-        if (!(o instanceof Person))
-        {
-            return false;
-        }
-
-        Person person = (Person) o;
-
-        if (id != null ? !id.equals(person.id) : person.id != null)
-        {
-            return false;
-        }
-
-        return true;
-    }
 
     public String getId()
     {
         return id;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return id != null ? id.hashCode() : 0;
     }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -74,5 +47,37 @@ public class BaseEntity implements org.domdrides.entity.Entity<String>
     protected void setId(String id)
     {
         this.id = id;
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
+// Canonical Methods
+//----------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (!(o instanceof BaseEntity))
+        {
+            return false;
+        }
+
+        BaseEntity that = (BaseEntity) o;
+
+        if (!id.equals(that.id))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return id.hashCode();
     }
 }
