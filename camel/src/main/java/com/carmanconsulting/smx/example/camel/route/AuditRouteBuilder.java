@@ -16,21 +16,22 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
-public class PersonPollingRouteBuilder extends AbstractRouteBuilder
+public class AuditRouteBuilder extends AbstractRouteBuilder
 {
-//----------------------------------------------------------------------------------------------------------------------
-// Other Methods
-//----------------------------------------------------------------------------------------------------------------------
+    public AuditRouteBuilder()
+    {
+        setInputUri(DEFAULT_AUDIT_URI);
+    }
+
+    @Override
+    protected void configureErrorHandling()
+    {
+        toDeadLetterOnly(Exception.class);
+    }
 
     @Override
     protected void configureRoutes()
     {
-        from("timer://personPolling?delay=3000&period=10000")
-                .transacted()
-                .to("bean:personRepository?method=getAll")
-                .split().body()
-                .to("jms:queue:people");
-
-        from("jms:queue:people").to("log:people");
+        from(getInputUri()).to("log:audit?showAll=true&level=INFO");
     }
 }

@@ -27,11 +27,6 @@
         </cm:default-properties>
     </cm:property-placeholder>
 
-    <bean id="auditService" class="com.carmanconsulting.smx.example.camel.service.impl.AuditServiceImpl">
-        <property name="businessProcessRepository" ref="businessProcessRepository" />
-        <tx:transaction method="*" value="RequiresNew" />
-    </bean>
-
     <bean id="newPersonRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.NewPersonRouteBuilder">
         <property name="inputUri" value="${newPerson.inputUri}" />
     </bean>
@@ -50,10 +45,15 @@
     <bean id="jms" class="org.apache.camel.component.jms.JmsComponent">
         <property name="connectionFactory" ref="connectionFactory" />
     </bean>
-    
+
+    <bean id="auditRouteBuilder" class="com.carmanconsulting.smx.example.camel.route.AuditRouteBuilder">
+
+    </bean>
+
     <camel:camelContext>
         <camel:routeBuilder ref="newPersonRouteBuilder" />
         <camel:routeBuilder ref="personPollingRouteBuilder" />
+        <camel:routeBuilder ref="auditRouteBuilder" />
     </camel:camelContext>
 </blueprint>
 

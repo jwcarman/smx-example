@@ -16,6 +16,7 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
+import com.carmanconsulting.smx.example.camel.exception.AuditException;
 import com.carmanconsulting.smx.example.camel.payload.JaxbSerializer;
 import com.carmanconsulting.smx.example.camel.payload.PayloadSerializer;
 import com.carmanconsulting.smx.example.camel.payload.StringEchoSerializer;
@@ -67,7 +68,7 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
     @Override
     public void start() throws Exception
     {
-        // Do nothing.
+        this.auditProducerTemplate = getContext().createProducerTemplate();
     }
 
     @Override
@@ -154,17 +155,23 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
         return new BeginBusinessProcessProcessor();
     }
 
-    @Override
-    public final void configure()
+    protected void toDeadLetterOnly(Class<? extends Exception> exceptionTypes)
     {
-        this.auditProducerTemplate = getContext().createProducerTemplate();
-        interceptFrom().process(new ManageActivityIdsProcessor());
+        onException(exceptionTypes).to(getDeadLetterUri());
+    }
+
+    @Override
+    public final void configure() throws Exception
+    {
+        getContext().addService(this);
+        interceptFrom().process(new InjectActivityIds());
         configureErrorHandling();
         configureRoutes();
     }
 
     protected void configureErrorHandling()
     {
+        toDeadLetterOnly(AuditException.class);
         onException()
                 .maximumRedeliveries(getMaxRedeliveries())
                 .redeliveryDelay(getRedeliveryDelay())
@@ -172,7 +179,7 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
                 .to("log:errors?level=ERROR&showAll=true&multiline=true")
                 .choice()
                     .when(header(HEADER_PROCESS_ID).isNotNull())
-                        .process(new ManageActivityIdsProcessor())
+                        .process(new InjectActivityIds())
                         .process(new ResumeBusinessProcessProcessor())
                     .otherwise()
                         .log("Unable to audit error message.  No business process id found.")
@@ -235,7 +242,7 @@ public abstract class AbstractRouteBuilder extends RouteBuilder implements Servi
         }
     }
 
-    private class ManageActivityIdsProcessor implements Processor
+    private class InjectActivityIds implements Processor
     {
         @Override
         public void process(Exchange exchange) throws Exception

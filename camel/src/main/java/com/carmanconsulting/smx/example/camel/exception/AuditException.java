@@ -16,18 +16,18 @@
 
 package com.carmanconsulting.smx.example.camel.exception;
 
-public class BamException extends RuntimeException
+public class AuditException extends RuntimeException
 {
 //----------------------------------------------------------------------------------------------------------------------
 // Constructors
 //----------------------------------------------------------------------------------------------------------------------
 
-    public BamException(String message)
+    public AuditException(String message)
     {
         super(message);
     }
 
-    public BamException(String message, Throwable cause)
+    public AuditException(String message, Throwable cause)
     {
         super(message, cause);
     }

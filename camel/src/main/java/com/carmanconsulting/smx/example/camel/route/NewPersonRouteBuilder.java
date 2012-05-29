@@ -16,11 +16,9 @@
 
 package com.carmanconsulting.smx.example.camel.route;
 
-import com.carmanconsulting.smx.example.camel.route.AbstractRouteBuilder;
 import com.carmanconsulting.smx.example.domain.entity.Person;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.builder.RouteBuilder;
 
 public class NewPersonRouteBuilder extends AbstractRouteBuilder
 {
