@@ -30,6 +30,7 @@
         <module>datasource</module>
         <module>service</module>
         <module>camel</module>
+        <module>cxf</module>
         <module>feature</module>
     </modules>
 </project>
