@@ -16,6 +16,8 @@
 
 package com.carmanconsulting.smx.example.domain.entity;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang.exception.ExceptionUtils;
 
 import javax.persistence.*;
@@ -59,6 +61,26 @@ public class Activity extends BaseEntity
 //----------------------------------------------------------------------------------------------------------------------
 // Getter/Setter Methods
 //----------------------------------------------------------------------------------------------------------------------
+
+    public String toString()
+    {
+        final ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE);
+        builder
+                .append("businessProcess", businessProcess)
+                .append("businessProcessId", businessProcessId)
+                .append("exchangePattern", exchangePattern)
+                .append("fromUri", fromUri)
+                .append("parentActivity", parentActivity)
+                .append("parentActivityId", parentActivityId)
+                .append("payload", payload);
+        if (errorMessage != null)
+        {
+            builder.append("errorUri", errorUri)
+                    .append("errorMessage", errorMessage)
+                    .append("errorDetails", errorDetails);
+        }
+        return builder.toString();
+    }
 
     public BusinessProcess getBusinessProcess()
     {
