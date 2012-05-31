@@ -32,6 +32,6 @@ public class AuditRouteBuilder extends AbstractRouteBuilder
     @Override
     protected void configureRoutes()
     {
-        from(getInputUri()).to("log:audit?showAll=true&level=INFO");
+        from(getInputUri()).to("log:audit?showAll=true&level=INFO&multiline=true");
     }
 }
