@@ -103,6 +103,12 @@
             <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-camel</artifactId>
+            <version>5.5.1-fuse-03-06</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
 
