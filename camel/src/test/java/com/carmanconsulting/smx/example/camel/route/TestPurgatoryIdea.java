@@ -45,10 +45,6 @@ public class TestPurgatoryIdea extends CamelTestSupport
         CamelContext context = new DefaultCamelContext(registry);
         context.setLazyLoadTypeConverters(isLazyLoadingTypeConverter());
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("vm://" + getClass().getName() + "?broker.persistent=false&broker.useJmx=false");
-        /*RedeliveryPolicy policy = new RedeliveryPolicy();
-        policy.setMaximumRedeliveries(-1);
-        policy.setRedeliveryDelay(200);
-        connectionFactory.setRedeliveryPolicy(policy);*/
         JmsTransactionManager jmsTransactionManager = new JmsTransactionManager(connectionFactory);
         registry.put("transactionManager", jmsTransactionManager);
         ActiveMQComponent jmsComponent = new ActiveMQComponent();
