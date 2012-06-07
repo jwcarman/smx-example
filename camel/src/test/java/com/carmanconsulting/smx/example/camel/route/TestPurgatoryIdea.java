@@ -15,6 +15,7 @@ import org.springframework.jms.connection.JmsTransactionManager;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
@@ -78,23 +79,24 @@ public class TestPurgatoryIdea extends CamelTestSupport
 
     private static class PurgatoryRouteBuilder extends SpringRouteBuilder
     {
-        private Set<String> blackList = Collections.synchronizedSet(new TreeSet<String>());
+        private Set<String> blackList = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
         @Override
         public void configure() throws Exception
         {
             onException()
                     .transacted()
+                    .log("Blacklisting message ${id}...")
                     .process(new BlacklistProcessor());
             interceptFrom()
                     .when(isBlackListed())
                     .transacted()
                     .choice()
                         .when(header(PURGATORY_COUNT).isGreaterThanOrEqualTo(3))
-                            .log("Sending message to DLC as it has exceeded purgatory count...")
+                            .log("Sending message ${id} to DLC as it has exceeded purgatory count...")
                             .to("mock:dlc")
                         .otherwise()
-                            .log("Sending message to purgatory...")
+                            .log("Sending message ${id} to purgatory (count=${in.header.purgatory-count})...")
                             .setHeader(PURGATORY_RETURN_SLIP, header(Exchange.INTERCEPTED_ENDPOINT))
                             .setHeader(PURGATORY_TIMEOUT, timeout(2, TimeUnit.SECONDS))
                             .to(PURGATORY_URI)
@@ -176,7 +178,6 @@ public class TestPurgatoryIdea extends CamelTestSupport
             @Override
             public void process(Exchange exchange) throws Exception
             {
-                log.debug("Blacklisting message {}...", exchange.getIn().getMessageId());
                 blackList.add(exchange.getIn().getMessageId());
             }
         }
