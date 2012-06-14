@@ -20,18 +20,31 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.carmanconsulting.smx</groupId>
-    <artifactId>smx-example-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <parent>
+        <groupId>com.carmanconsulting.smx</groupId>
+        <artifactId>bundle-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
 
-    <modules>
-        <module>bundle-parent</module>
-        <module>datasource</module>
-        <module>service</module>
-        <module>camel</module>
-        <module>cxf</module>
-        <module>feature</module>
-        <module>commands</module>
-    </modules>
+    <groupId>com.carmanconsulting.smx</groupId>
+    <artifactId>smx-commands</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+    <name>Some Useful ServiceMix Commands</name>
+
+    <properties>
+        <karaf.version>2.2.2</karaf.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.command</artifactId>
+            <version>${karaf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
+            <version>${karaf.version}</version>
+        </dependency>
+    </dependencies>
 </project>
