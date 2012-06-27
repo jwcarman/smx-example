@@ -27,7 +27,7 @@
     </parent>
 
     <groupId>com.carmanconsulting.smx</groupId>
-    <artifactId>com.carmanconsulting.smx.example</artifactId>
+    <artifactId>smx-example-feature</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>smx-example feature</name>
@@ -38,19 +38,34 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>com.carmanconsulting.smx.example.datasource</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.serp</artifactId>
+            <version>1.13.1_4</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>com.carmanconsulting.smx.example.camel</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>smx-example-service</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>com.carmanconsulting.smx.example.cxf</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>smx-example-camel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>smx-example-cxf</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.openjpa</groupId>
@@ -79,21 +94,9 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.serp</artifactId>
-            <version>1.13.1_4</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>1.4</version>
-        </dependency>
+
+
+
         <dependency>
             <groupId>org.domdrides</groupId>
             <artifactId>domdrides-core</artifactId>

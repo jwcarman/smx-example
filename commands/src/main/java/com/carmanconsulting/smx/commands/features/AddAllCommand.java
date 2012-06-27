@@ -22,7 +22,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 
 import java.net.URI;
-import java.util.List;
+import java.util.*;
 
 @Command(scope = "features", name = "addall", description = "Adds a list of repository URLs to the features service and installs all features contained within them.")
 public class AddAllCommand extends AbstractFeaturesCommand
@@ -58,8 +58,15 @@ public class AddAllCommand extends AbstractFeaturesCommand
 
     private void installFeatures(FeaturesService admin, URI repositoryUri) throws Exception
     {
+        Set<Feature> installed = new HashSet<Feature>();
+        Stack<Feature> working = new Stack<Feature>();
+        working.addAll(Arrays.asList(findRepository(admin, repositoryUri).getFeatures()));
         for (Feature feature : findRepository(admin, repositoryUri).getFeatures())
         {
+            if(!installed.contains(feature))
+            {
+
+            }
             try
             {
                 admin.installFeature(feature.getName());

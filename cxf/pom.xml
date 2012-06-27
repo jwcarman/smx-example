@@ -22,57 +22,16 @@
 
     <parent>
         <groupId>com.carmanconsulting.smx</groupId>
-        <artifactId>bundle-parent</artifactId>
+        <artifactId>camel-bundle-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../bundle-parent</relativePath>
+        <relativePath>../camel-bundle-parent</relativePath>
     </parent>
-    <artifactId>com.carmanconsulting.smx.example.cxf</artifactId>
+    <artifactId>smx-example-cxf</artifactId>
     <packaging>bundle</packaging>
 
     <properties>
-        <camel.version>2.8.0-fuse-03-06</camel.version>
         <cxf.version>2.4.3-fuse-01-02</cxf.version>
     </properties>
-
-    <dependencies>
-
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-core</artifactId>
-            <version>${camel.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-cxf</artifactId>
-            <version>${camel.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-test</artifactId>
-            <version>${camel.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-camel</artifactId>
-            <version>5.5.1-fuse-03-06</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>

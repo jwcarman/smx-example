@@ -34,7 +34,6 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <osgi.version>4.2.0</osgi.version>
         <osgi.import>*</osgi.import>
-        <osgi.dynamic.import>*</osgi.dynamic.import>
     </properties>
 
     <dependencies>
@@ -125,7 +124,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>${osgi.import}</Import-Package>
-                        <DynamicImport-Package>${osgi.dynamic.import}</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

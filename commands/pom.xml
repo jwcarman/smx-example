@@ -27,10 +27,9 @@
     </parent>
 
     <groupId>com.carmanconsulting.smx</groupId>
-    <artifactId>smx-commands</artifactId>
+    <artifactId>smx-example-commands</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <name>Some Useful ServiceMix Commands</name>
 
     <properties>
         <karaf.version>2.2.2</karaf.version>

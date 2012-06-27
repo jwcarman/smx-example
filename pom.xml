@@ -27,7 +27,7 @@
 
     <modules>
         <module>bundle-parent</module>
-        <module>datasource</module>
+        <module>camel-bundle-parent</module>
         <module>service</module>
         <module>camel</module>
         <module>cxf</module>

@@ -43,13 +43,17 @@ public class RemoveAllCommand extends AbstractFeaturesCommand
         for (String url : urls)
         {
             URI repositoryUri = new URI(url);
-            for (Feature feature : findRepository(admin, repositoryUri).getFeatures())
+            Feature[] features = findRepository(admin, repositoryUri).getFeatures();
+            for (int i = features.length - 1; i >= 0; i--)
             {
+                Feature feature = features[i];
                 if(admin.isInstalled(feature))
                 {
+                    System.out.println("Uninstalling feature " + feature.getName() + "...");
                     admin.uninstallFeature(feature.getName());
                 }
             }
+            System.out.println("Removing feature repository " + repositoryUri + "...");
             admin.removeRepository(repositoryUri);
         }
     }
