@@ -14,6 +14,11 @@ public class TestSprocServiceImpl
 // Static Methods
 //----------------------------------------------------------------------------------------------------------------------
 
+    public static String formalHello(String first, String last)
+    {
+        return "Hello, " + first + " " + last + "!";
+    }
+
     public static String hello(String name)
     {
         return ("Hola, " + name + "!");
@@ -40,18 +45,75 @@ public class TestSprocServiceImpl
                 "    no sql\n" +
                 "    external name '" + getClass().getName() + ".hello'");
 
+        new JdbcTemplate(dataSource).update("create function formal\n" +
+                "    (firstName varchar(50), lastName varchar(50))\n" +
+                "    returns varchar(50)\n" +
+                "    language java parameter style java\n" +
+                "    no sql\n" +
+                "    external name '" + getClass().getName() + ".formalHello'");
+
         final SprocServiceImpl sprocService = new SprocServiceImpl();
         sprocService.setDataSource(dataSource);
         final ParametersBean bean = new ParametersBean();
         bean.setName("Jim");
         sprocService.executeSproc(bean);
         System.out.println(bean.getGreeting());
+
+        FormalParametersBean formal = new FormalParametersBean();
+        formal.setFirstName("Slappy");
+        formal.setLastName("White");
+        sprocService.executeSproc(formal);
+        System.out.println(formal.getGreeting());
     }
 
 //----------------------------------------------------------------------------------------------------------------------
 // Inner Classes
 //----------------------------------------------------------------------------------------------------------------------
 
+    @Sproc(name = "formal")
+    public static class FormalParametersBean
+    {
+        @Param(type = ParamType.RETURN)
+        private String greeting;
+
+        @Param(index = 2)
+        private String lastName;
+
+        @Param(index = 1)
+        private String firstName;
+
+
+        public String getLastName()
+        {
+            return lastName;
+        }
+
+        public void setLastName(String lastName)
+        {
+            this.lastName = lastName;
+        }
+
+        public String getGreeting()
+        {
+            return greeting;
+        }
+
+        public void setGreeting(String greeting)
+        {
+            this.greeting = greeting;
+        }
+
+        public String getFirstName()
+        {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName)
+        {
+            this.firstName = firstName;
+        }
+    }
+    
     @Sproc(name = "hello")
     public static class ParametersBean
     {
